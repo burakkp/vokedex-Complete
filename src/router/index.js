@@ -10,6 +10,14 @@ const routes = [
     name: 'Home',
     component: Home
   },
+  { path: '/q/:query',     
+    name: 'Search',
+    component: Home 
+  },
+  { path: '/pokemon/:pokemon',     
+  name: 'Pokemon',
+  component: Home 
+}
 ]
 
 const router = new VueRouter({

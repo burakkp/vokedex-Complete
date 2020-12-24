@@ -1,157 +1,79 @@
 <template>
-  <b-container class="p-3 bg-secondary home-view rounded">
-    <b-row>
-      <div id="blue-ball" class="bg-primary rounded-circle m-4" />
+  <b-container
+    class="p-5 home-view rounded"
+    :key="darkTheme"
+    :style="{ backgroundColor: theme }"
+    >
+    <b-row class="mb-3">
+      <div id="blue-ball" class="bg-primary rounded-circle m-4" @click="switchTheme()" />
       <div class="tiny-balls bg-danger rounded-circle mr-1 mt-4" />
       <div class="tiny-balls bg-warning rounded-circle mr-1 mt-4" />
       <div class="tiny-balls bg-success rounded-circle mr-1 mt-4" />
     </b-row>
-    <b-row>
-      <h1 v-if="fire" class="fire">Flareon is a fire Pokémon</h1>
-      <h1 v-else-if="water" class="water">Horea is a water Pokémon</h1>
-      <h1 v-else-if="grass" class="grass">Bellosom is a grass Pokémon</h1>
-      <h1 v-else>No type specified</h1>
-      <h1 v-show="fire">Visible in the DOM, but invisible to the eye</h1>
+    <b-row class="h-50">
+      <ImagePokemon />
+      <Search />
     </b-row>
-    <ul>
-      <li v-for="detail in details" :key="detail.index">
-        {{ detail }}
-      </li>
-    </ul>
-    <div v-for="pokemon in pokemons" :key="pokemon.index">
-      <h3>{{ pokemon.name }}</h3>
-      <p>{{ pokemon.type }}</p>
-    </div>
-
-    <p :id="name">Hellow {{ firstName }}</p>
-    <button v-on:click="aClickHandler('hellow')">my ugly button</button>
-    <button
-      type="submit"
-      @click.prevent="aClickHandler('whow thats alert ' + firstName)"
-    >
-      Hellow
-    </button>
-
-    <form @submit="formSubmit">
-      <input v-model="searchQuery" />
-      <button type="submit">Search</button>
-      <button type="submit" @click.prevent="resetForm">reset</button>
-    </form>
-
-    <div :class="{darkTheme: isDark}">
-      <h2
-        v-for="pokemon in pokemons"
-        :key="pokemon.index"
-        :class="pokemon.color"
-      >
-        {{ pokemon.name }}
-      </h2>
-    </div>
-    <button @click="isDark = !isDark">Enter Darkness</button>
-
-    <h2>
-      {{title}}
-    </h2>
-
-    <h2 v-for="pokemon in fieryPokemons" :key="pokemon.index">
-      {{ pokemon }}
-    </h2>
-
-    
-    <b-row> </b-row>
-
-    <Pokemon :pokemons="starters" />
+    <b-row class="h-50">
+      <PokemonDetails />
+      <SearchResults />
+    </b-row>
   </b-container>
 </template>
 
 <script>
-
-import Pokemon from "../components/Pokemon";
-
+import { mapActions } from 'vuex'
+import ImagePokemon from '../components/ImagePokemon';
+import SearchResults from '../components/SearchResults';
+import Search from '../components/Search/Search';
+import PokemonDetails from '../components/PokemonDetails';
 export default {
   name: "Home",
-  components: {
-    Pokemon
-  },
   data() {
     return {
-      firstName: "Burak",
-      fire: false,
-      water: false,
-      grass: true,
-      details: ["awesome", "fire", "dragon"],
-      pokemons: [
-        { name: "charmender", type: "fire", color: "red" },
-        { name: "squirtle", type: "water", color: "blue" },
-        { name: "bulbasaur", type: "grass", color: "green" },
-      ],
-      pokemonss: ["charmander", "squirtle", "bulbasaur"],
-      poke: {
-        name: "bulbasaur",
-        number: "001"
-      },
-      checked: true,
-      isDark: false,
-      searchQuery: "",
-      starters: [
-        { name: "charmander", type: "fire" },
-        { name: "squirtle", type: "water" },
-        { name: "bulbasaur", type: "grass" },
-      ]
+      darkTheme: false,
     };
   },
-  methods: {
-    resetForm() {
-      this.searchQuery = "";
-    },
-    formSubmit() {
-      alert(`hi you want to search for: ${this.searchQuery}`);
-    },
-    isFiery(value){
-      return value.includes("bulb")
-    }
+  components: {
+    ImagePokemon,
+    Search,
+    SearchResults,
+    PokemonDetails,
   },
   computed: {
-    title(){
-      return this.poke.name + " " + this.poke.number
-    },
-    fieryPokemons() {
-      return this.pokemonss.filter(this.isFiery)
+    theme() {
+      if (this.darkTheme) {
+        return '#343a40';
+      }
+      return '#D50A2C';
     }
-  }
+  },
+  beforeMount: function(){
+    this.$store.dispatch('getAllPokemon')
+    if(this.$route.params.pokemon){
+      this.$store.dispatch('getPokemonDetails', `https://pokeapi.co/api/v2/pokemon/${this.$route.params.pokemon}`)
+    }
+  },
+  methods: {
+    ...mapActions([
+      'filterPokemon',
+    ]),
+    switchTheme() {
+      this.darkTheme = !this.darkTheme;
+    }
+}
 };
 </script>
 
 <style lang="scss">
-.darkTheme{
-  background-color: black;
-
-  h2{
-    color: black;
-  }
-}
-.fire {
-  color: red;
-}
-.water {
-  color: blue;
-}
-.grass {
-  color: green;
-}
-.red {
-  color: red;
-}
-.blue {
-  color: blue;
-}
-.green {
-  color: green;
-}
 #blue-ball {
   height: 70px;
   width: 70px;
   border: 10px solid lightgrey;
+}
+
+#blue-ball:hover {
+  cursor: pointer;
 }
 
 .tiny-balls {
@@ -162,5 +84,6 @@ export default {
 
 .home-view {
   border: 3px solid black;
+  height: 800px;
 }
 </style>
